@@ -22,6 +22,7 @@ import type * as Md from 'mdast'
 import type {} from 'mdast-util-math'
 import { normalizeUri } from 'micromark-util-sanitize-uri'
 import { CodeBlock } from './CodeBlock.tsx'
+import { MermaidBlock } from './MermaidBlock.tsx'
 import { renderTexToReact } from './katex.tsx'
 import type { PositionedBlock } from './incremental.ts'
 import css from './MarkdownText.module.css'
@@ -314,6 +315,18 @@ function renderCode(node: Md.Code, key: Key, context: MarkdownRenderContext): Re
     // ```math fences render as display TeX once settled (rehype-katex parity);
     // its text extraction saw the code block's trailing newline.
     return <Fragment key={key}>{renderTexToReact(`${node.value}\n`, true)}</Fragment>
+  }
+  if (!context.streaming && lang === 'mermaid') {
+    // Settled ```mermaid fences render as diagrams; while streaming they stay
+    // source CodeBlocks, like every other fence.
+    return (
+      <MermaidBlock
+        key={key}
+        code={node.value}
+        copyLabel={context.codeLabels?.copyLabel}
+        copiedLabel={context.codeLabels?.copiedLabel}
+      />
+    )
   }
   return (
     <CodeBlock

@@ -1,0 +1,25 @@
+/* Mermaid diagram block: CodeBlock's vertical rhythm, diagram centered with
+ * horizontal scroll for over-wide charts. Colors live in mermaid's runtime
+ * theme, not here. */
+
+.block {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--dsw-alias-markdown-code-block);
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.block:not(:last-child) {
+  margin-bottom: 11px;
+}
+
+.diagram {
+  display: flex;
+  justify-content: center;
+}
+
+.diagram svg {
+  max-width: 100%;
+  height: auto;
+}
