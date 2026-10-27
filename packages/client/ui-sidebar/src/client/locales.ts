@@ -8,6 +8,8 @@ export const zh = {
   'toggle.collapse': '收起侧边栏',
   'panels.label': '全局面板',
   'panels.more': '更多',
+  'panels.section.collapse': '收起面板列表',
+  'panels.section.expand': '展开面板列表',
   'version.copied': '版本号复制成功',
 } satisfies Record<string, string>
 
@@ -22,6 +24,8 @@ export const en = {
   'toggle.collapse': 'Collapse sidebar',
   'panels.label': 'Global panels',
   'panels.more': 'More',
+  'panels.section.collapse': 'Collapse panel list',
+  'panels.section.expand': 'Expand panel list',
   'version.copied': 'Version copied',
 } satisfies Record<SidebarKey, string>
 
@@ -33,6 +37,8 @@ export const ja = {
   'toggle.collapse': 'サイドバーを折りたたむ',
   'panels.label': 'グローバルパネル',
   'panels.more': 'その他',
+  'panels.section.collapse': 'パネルリストを折りたたむ',
+  'panels.section.expand': 'パネルリストを展開',
   'version.copied': 'バージョンをコピーしました',
 } satisfies Record<keyof typeof en, string>
 
@@ -44,6 +50,8 @@ export const es = {
   'toggle.collapse': 'Contraer barra lateral',
   'panels.label': 'Paneles globales',
   'panels.more': 'Más',
+  'panels.section.collapse': 'Contraer la lista de paneles',
+  'panels.section.expand': 'Expandir la lista de paneles',
   'version.copied': 'Versión copiada',
 } satisfies Record<keyof typeof en, string>
 
@@ -55,6 +63,8 @@ export const fr = {
   'toggle.collapse': 'Réduire la barre latérale',
   'panels.label': 'Panneaux globaux',
   'panels.more': 'Plus',
+  'panels.section.collapse': 'Réduire la liste des panneaux',
+  'panels.section.expand': 'Développer la liste des panneaux',
   'version.copied': 'Version copiée',
 } satisfies Record<keyof typeof en, string>
 
@@ -66,6 +76,8 @@ export const de = {
   'toggle.collapse': 'Seitenleiste einklappen',
   'panels.label': 'Globale Bereiche',
   'panels.more': 'Mehr',
+  'panels.section.collapse': 'Panel-Liste einklappen',
+  'panels.section.expand': 'Panel-Liste ausklappen',
   'version.copied': 'Version kopiert',
 } satisfies Record<keyof typeof en, string>
 
@@ -77,6 +89,8 @@ export const ru = {
   'toggle.collapse': 'Свернуть боковую панель',
   'panels.label': 'Глобальные панели',
   'panels.more': 'Ещё',
+  'panels.section.collapse': 'Свернуть список панелей',
+  'panels.section.expand': 'Развернуть список панелей',
   'version.copied': 'Версия скопирована',
 } satisfies Record<keyof typeof en, string>
 
@@ -88,5 +102,7 @@ export const pt = {
   'toggle.collapse': 'Recolher barra lateral',
   'panels.label': 'Painéis globais',
   'panels.more': 'Mais',
+  'panels.section.collapse': 'Recolher a lista de painéis',
+  'panels.section.expand': 'Expandir a lista de painéis',
   'version.copied': 'Versão copiada',
 } satisfies Record<keyof typeof en, string>

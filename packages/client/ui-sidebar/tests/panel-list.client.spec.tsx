@@ -458,6 +458,30 @@ describe('sidebar entry click analytics', () => {
     expect(track.mock.invocationCallOrder[0]).toBeLessThan(layout.selectPanel.mock.invocationCallOrder[0]!)
   })
 
+  it('collapses the panel section through the header toggle and persists the choice', async () => {
+    const { runtime, sidebar, locale, view } = await bench()
+    await mountPanels(runtime, locale)
+    const header = await view.findByRole('button', { name: 'Collapse panel list' })
+    expect(header.getAttribute('aria-expanded')).toBe('true')
+    expect(header.getAttribute('aria-controls')).toBe('sidebar-global-panels')
+
+    fireEvent.click(header)
+    const collapsedHeader = view.getByRole('button', { name: 'Expand panel list' })
+    expect(collapsedHeader.getAttribute('aria-expanded')).toBe('false')
+    expect(collapsedHeader.getAttribute('aria-controls')).toBeNull()
+    expect(view.queryByRole('navigation', { name: 'Global panels' })).toBeNull()
+    expect(localStorage.getItem('dsh.sidebar.panel-section.v1')).toBe('collapsed')
+
+    // The choice survives a remount of the whole sidebar plugin.
+    await sidebar.dispose()
+    await runtime.mount({ inject: [...inject], apply })
+    expect(view.getByRole('button', { name: 'Expand panel list' }).getAttribute('aria-expanded')).toBe('false')
+    fireEvent.click(view.getByRole('button', { name: 'Expand panel list' }))
+    expect(await view.findByRole('navigation', { name: 'Global panels' })).toBeTruthy()
+    expect(localStorage.getItem('dsh.sidebar.panel-section.v1')).toBeNull()
+    expect(view.getByRole('button', { name: 'Collapse panel list' })).toBeTruthy()
+  })
+
   it('reports every More button click, whether it opens or closes the menu', async () => {
     const { runtime, track, navigation } = await analyticsBench()
     await mountProbeActions(runtime)

@@ -10,6 +10,9 @@
  * global panel rows and the foot is the `sidebar.workspaces` registrant's,
  * and the foot holds `sidebar.settings` plus `sidebar.footer.action`; the shell
  * hands them the wide flag (plus an expand request callback for the browser).
+ * The global-panel section itself carries a header toggle that hides its rows
+ * independently of the column; the choice persists through panel-section.ts
+ * and defaults to expanded.
  *
  * The column also owns whether the scroll regions nested in it draw a
  * scrollbar at all: the shell tracks the pointer and rebinds ui-theme's
@@ -19,14 +22,15 @@
 import { useEffect, useRef, useState } from 'react'
 import clsx from 'clsx'
 import {
-  FishLogo, IconAppsAddOutlineRegular, IconNewChatOutlineMedium, IconNewChatOutlineRegular, IconPanelLeftOutlineRegular,
-  isDarwinDesktop, Menu, ShortcutKeys, Toast, Tooltip, writeClipboard,
+  FishLogo, IconAppsAddOutlineRegular, IconChevronDownOutlineRegular, IconNewChatOutlineMedium,
+  IconNewChatOutlineRegular, IconPanelLeftOutlineRegular, isDarwinDesktop, Menu, ShortcutKeys, Toast, Tooltip, writeClipboard,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { InjectFace, PropsRenderSlots, PropsRuntime } from '@deepseek-ai/dsh-client-ui-slots'
 import type {
   SidebarPanelActionsOwnerProps, SidebarPanelMetadata, SidebarRootComponentProps, SidebarRootInjected, SidebarSectionOwnerProps,
 } from './contract/slots.ts'
 import { FIXED_PANEL_ID } from './panel-pins.ts'
+import { readPanelSectionExpanded, writePanelSectionExpanded } from './panel-section.ts'
 import css from './SidebarRoot.module.css'
 
 /** Wide-content unmount delay; matches the 150ms wide-content fade-out. */
@@ -163,6 +167,16 @@ export function SidebarRoot({
   }, [collapsed])
   const windowsTitlebar = document.documentElement.hasAttribute('data-windows-titlebar')
   const wide = windowsTitlebar ? !collapsed : !collapsed || !settled
+  // The global-panel section collapses independently of the column: hiding its
+  // rows hands the freed vertical space to the workspace browsing region. The
+  // choice persists in localStorage and defaults to expanded.
+  const [sectionExpanded, setSectionExpanded] = useState(readPanelSectionExpanded)
+  const togglePanelSection = (): void => {
+    setSectionExpanded((expanded) => {
+      writePanelSectionExpanded(!expanded)
+      return !expanded
+    })
+  }
   // The Windows titlebar hosts the New Session controls while the sidebar is collapsed.
   const openNewSession = (): void => {
     trackEntryClick({ menu_name: 'new_session', position: windowsTitlebar && collapsed ? 'titlebar' : 'sidebar' })
@@ -355,37 +369,62 @@ export function SidebarRoot({
       )}
 
       {panels.length > 0 && (
-        <nav className={css.panelList} aria-label={t('panels.label')}>
-          {panels.filter(({ id }) => id === FIXED_PANEL_ID || !unpinned.includes(id)).map(({ id, label }) => (
-            <PanelRow
-              key={id}
-              id={id}
-              label={label}
-              wide={wide}
-              usePanelInfo={usePanelInfo}
-              selectPanel={selectPanel}
-              trackEntryClick={trackEntryClick}
-              renderSlot={renderSlot}
-            />
-          ))}
-          {hasEntryActions && (
-            <PanelMoreMenu
-              wide={wide}
-              label={t('panels.more')}
-              entries={panels.filter(({ id }) => id !== FIXED_PANEL_ID)
-                .map(({ id, label }) => ({ id, label, pinned: !unpinned.includes(id), active: id === activePanelId }))}
-              onOpen={(id) => {
-                const entry = officialEntry(id)
-                if (entry !== undefined) trackEntryClick({ menu_name: entry, position: 'sidebar_more' })
-                const panel = panels.find(candidate => candidate.id === id)
-                if (panel !== undefined) selectPanel(panel.id)
-              }}
-              onPinnedChange={setPinned}
-              trackEntryClick={trackEntryClick}
-              renderSlot={renderSlot}
-            />
+        <>
+          <Tooltip
+            label={sectionExpanded ? t('panels.section.collapse') : t('panels.section.expand')}
+            delayMs={500}
+            side={captionTooltipSide}
+            disabled={wide}
+          >
+            <button
+              type="button"
+              className={css.panelHeader}
+              aria-label={sectionExpanded ? t('panels.section.collapse') : t('panels.section.expand')}
+              aria-expanded={sectionExpanded}
+              aria-controls={sectionExpanded ? 'sidebar-global-panels' : undefined}
+              onClick={togglePanelSection}
+            >
+              {wide && <span className={css.panelHeaderTitle}>{t('panels.label')}</span>}
+              <IconChevronDownOutlineRegular
+                className={clsx(css.panelHeaderChevron, !sectionExpanded && css.panelHeaderChevronCollapsed)}
+                size={wide ? 16 : 18}
+              />
+            </button>
+          </Tooltip>
+          {sectionExpanded && (
+            <nav id="sidebar-global-panels" className={css.panelList} aria-label={t('panels.label')}>
+              {panels.filter(({ id }) => id === FIXED_PANEL_ID || !unpinned.includes(id)).map(({ id, label }) => (
+                <PanelRow
+                  key={id}
+                  id={id}
+                  label={label}
+                  wide={wide}
+                  usePanelInfo={usePanelInfo}
+                  selectPanel={selectPanel}
+                  trackEntryClick={trackEntryClick}
+                  renderSlot={renderSlot}
+                />
+              ))}
+              {hasEntryActions && (
+                <PanelMoreMenu
+                  wide={wide}
+                  label={t('panels.more')}
+                  entries={panels.filter(({ id }) => id !== FIXED_PANEL_ID)
+                    .map(({ id, label }) => ({ id, label, pinned: !unpinned.includes(id), active: id === activePanelId }))}
+                  onOpen={(id) => {
+                    const entry = officialEntry(id)
+                    if (entry !== undefined) trackEntryClick({ menu_name: entry, position: 'sidebar_more' })
+                    const panel = panels.find(candidate => candidate.id === id)
+                    if (panel !== undefined) selectPanel(panel.id)
+                  }}
+                  onPinnedChange={setPinned}
+                  trackEntryClick={trackEntryClick}
+                  renderSlot={renderSlot}
+                />
+              )}
+            </nav>
           )}
-        </nav>
+        </>
       )}
 
       {/* The browsing region fills the column between the controls and the
